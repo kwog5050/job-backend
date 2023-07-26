@@ -4,10 +4,10 @@ import cors from 'cors';
 import { saramin } from './crawling/saramin';
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-app.listen(8080, () => console.log('SERVER ON'));
+app.listen(4545, () => console.log('SERVER ON'));
 
 app.post('/saramin', async (req: Request, res: Response) => {
     const data = await saramin(req.body.keyword);
