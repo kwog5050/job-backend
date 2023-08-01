@@ -1,8 +1,8 @@
-export interface CrawlingData {
+export interface JobData {
     siteName: string;
     companyName: string;
     title: string;
-    day: string | Promise<string>;
+    day: string;
     href: string | undefined;
     sector: string[];
     detailOption: {
@@ -11,4 +11,9 @@ export interface CrawlingData {
         academic: string;
         typeOfEmployment: string;
     };
+}
+
+export interface CrawlingData {
+    pagination: number[];
+    searchList: JobData[];
 }

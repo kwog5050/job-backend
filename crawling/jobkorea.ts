@@ -2,30 +2,35 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { CrawlingData } from '../interfaces/crawling';
 
-export const jobkorea = async (keyword: string) => {
-    const res = await axios.get(`https://www.jobkorea.co.kr/Search/?stext=${keyword}`);
+export const jobkorea = async (keyword: any, page: any) => {
+    const res = await axios.get(`https://www.jobkorea.co.kr/Search/?stext=${keyword}&Page_No=${page}`);
     const $ = cheerio.load(res.data);
     const content = $('.list-post');
-    let jobkoreaData: CrawlingData[] = [];
 
-    for (let i = 0; i < content.length; i++) {
-        const el = content[i];
+    const paginationElements = $('.tplPagination.newVer.wide ul li');
+    const pagination: number[] = [];
+    paginationElements.each((i, el) => {
+        const page = $(el).text().trim();
+        pagination.push(parseInt(page, 10));
+    });
+
+    let jobkoreaData: CrawlingData = { pagination: pagination, searchList: [] };
+
+    content.each((i, el) => {
         const companyName = $(el).find('.post-list-corp .name.dev_view').text().trim();
         const title = $(el).find('.post-list-info .title.dev_view').text().trim();
         const href = $(el).find('.post-list-info .title.dev_view').attr('href');
-        const day = await getDate(href);
-
+        const day = $(el).find('.post-list-info .option .date').text().trim();
         const detailOption = {
-            area: `${$(el).find('.post-list-info .option .loc.long').text().trim()}`,
-            career: $(el).find('.post-list-info .option .exp').text().trim(),
+            area: $(el).find('.post-list-info .option .loc.long').text().trim(),
+            career: $(el).find('.post-list-info .option .exp ').text().trim(),
             academic: $(el).find('.post-list-info .option .edu').text().trim(),
             typeOfEmployment: $(el).find('.post-list-info .option span:nth-child(3)').text().trim(),
         };
-
         const sector = $(el).find('.post-list-info .etc').text().trim();
 
         if (companyName === '' || title === '') {
-            continue;
+            return;
         }
 
         const data = {
@@ -41,25 +46,8 @@ export const jobkorea = async (keyword: string) => {
             detailOption: detailOption,
         };
 
-        jobkoreaData.push(data);
-    }
+        jobkoreaData.searchList.push(data);
+    });
 
     return jobkoreaData;
-};
-
-// 등록일 가져오기
-const getDate = async (href: string | undefined): Promise<string> => {
-    if (!href) {
-        return '';
-    }
-    const resDate = await axios.get(`https://www.jobkorea.co.kr${href}`);
-    const $date = cheerio.load(resDate.data);
-    const date = $date('.date dd:nth-child(2) .tahoma').text().trim();
-    const formattedDate = date.replace(/\./g, '/');
-
-    if (formattedDate === '') {
-        return '상시채용';
-    } else {
-        return formattedDate;
-    }
 };
