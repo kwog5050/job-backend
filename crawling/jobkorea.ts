@@ -7,8 +7,9 @@ export const jobkorea = async (keyword: any, page: any) => {
     const $ = cheerio.load(res.data);
     const content = $('.list-post');
 
-    const paginationElements = $('.tplPagination.newVer.wide ul li');
+    const paginationElements = $('.recruit-info .lists .lists-cnt.dev_list .tplPagination.newVer.wide:not(.clear) ul li');
     const pagination: number[] = [];
+
     paginationElements.each((i, el) => {
         const page = $(el).text().trim();
         pagination.push(parseInt(page, 10));

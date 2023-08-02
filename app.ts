@@ -23,6 +23,7 @@ app.get('/jobkorea', async (req: Request, res: Response) => {
 app.get('/all', async (req: Request, res: Response) => {
     const saraminData = await saramin(req.query.keyword, req.query.page);
     const jobkoreaData = await jobkorea(req.query.keyword, req.query.page);
+
     const data = {
         pagination: saraminData.pagination.length > jobkoreaData.pagination.length ? saraminData.pagination : jobkoreaData.pagination,
         searchList: [...saraminData.searchList, ...jobkoreaData.searchList],
